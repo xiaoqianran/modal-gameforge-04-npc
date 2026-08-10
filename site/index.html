@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>04 · NPC 智能 · GameForge</title>
-  <meta name="description" content="结构化动作脑 → 记忆/世界 → 任务图 — modal run（one-shot）" />
+  <meta name="description" content="结构化动作脑 → 记忆 → 任务图（one-shot，无 asgi 常驻）" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -58,9 +58,7 @@
     }
     .grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 18px; }
     @media (min-width: 800px) { .grid { grid-template-columns: 1.2fr 0.8fr; } }
-    .card {
-      background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px;
-    }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
     h2 { margin: 0 0 12px; font-size: 1.05rem; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
     td, th { border-bottom: 1px solid var(--line); padding: 10px 8px; text-align: left; vertical-align: top; }
@@ -79,16 +77,16 @@
     <section class="hero">
       <div class="badge">one-shot · modal run · no deploy</div>
       <h1>04 · NPC 智能</h1>
-      <p class="lead">结构化动作脑 → 记忆/世界 → 任务图 — modal run（one-shot）</p>
+      <p class="lead">结构化动作脑 → 记忆 → 任务图（one-shot，无 asgi 常驻）</p>
       <pre><code>modal run apps/01-brain/app.py --text "前面那座塔是什么地方？"</code></pre>
-      <p class="ok">✓ per-module modal run · Pages ← GitHub Actions</p>
+      <p class="ok">✓ npc · no asgi · Pages ← Actions</p>
     </section>
     <div class="grid">
       <section class="card">
         <h2>仓内模块（01 起重排）</h2>
         <table>
           <thead><tr><th>#</th><th>模块</th><th>说明</th></tr></thead>
-          <tbody><tr><td class="num">01</td><td><code>brain</code></td><td>Qwen2.5 / rule fallback</td></tr><tr><td class="num">02</td><td><code>memory</code></td><td>Volume 记忆库</td></tr><tr><td class="num">03</td><td><code>quest</code></td><td>约束任务生成</td></tr></tbody>
+          <tbody><tr><td class="num">01</td><td><code>brain</code></td><td>结构化 NPC actions JSON</td></tr><tr><td class="num">02</td><td><code>memory</code></td><td>Volume 记忆读写</td></tr><tr><td class="num">03</td><td><code>quest</code></td><td>约束任务图</td></tr></tbody>
         </table>
       </section>
       <section class="card">
@@ -96,16 +94,14 @@
         <ul class="warn">
           <li>❌ 不要 <code>modal deploy</code> 常驻服务</li>
           <li>❌ 不要 <code>keep_warm</code> / 常驻 GPU</li>
+          <li>❌ 不要 <code>@modal.asgi_app</code> 常驻 HTTP</li>
           <li>✅ 只用 <code>modal run</code>，跑完容器销毁</li>
-          <li>✅ 产物走 Volume <code>gameforge-assets</code></li>
           <li>✅ Pages 源 = <strong>GitHub Actions</strong></li>
           <li>源码：<a href="https://github.com/xiaoqianran/modal-gameforge-04-npc">modal-gameforge-04-npc</a></li>
         </ul>
       </section>
     </div>
   </main>
-  <footer>
-    Deployed by GitHub Actions → GitHub Pages · GameForge modal-gameforge-04-npc
-  </footer>
+  <footer>Deployed by GitHub Actions → GitHub Pages · modal-gameforge-04-npc</footer>
 </body>
 </html>

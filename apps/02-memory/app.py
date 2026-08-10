@@ -1,113 +1,55 @@
-"""02-memory — NPC memory & world state store on Modal Volume.
+"""02-memory — NPC memory / world state on Modal Volume (one-shot).
 
-Modal App: gf-04-02-memory
+  modal run apps/02-memory/app.py --npc-id guard_01 --text "玩家问了北塔"
 """
 from __future__ import annotations
 
 import json
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
 
 import modal
 
-APP_NAME = "gf-04-02-memory"
+APP_NAME = "gf-04-02-memory-run"
 app = modal.App(APP_NAME)
 vol = modal.Volume.from_name("gameforge-npc-memory", create_if_missing=True)
-image = modal.Image.debian_slim(python_version="3.11").pip_install("fastapi[standard]")
+image = modal.Image.debian_slim(python_version="3.11")
 
 
 def _npc_path(npc_id: str) -> Path:
-    return Path("/mem") / "npc" / f"{npc_id}.json"
+    return Path("/mem") / "npcs" / npc_id / "memory.jsonl"
 
 
-def _world_path(world_id: str = "default") -> Path:
-    return Path("/mem") / "world" / f"{world_id}.json"
-
-
-@app.function(image=image, volumes={"/mem": vol}, timeout=60)
-def memory_get(npc_id: str) -> dict:
-    p = _npc_path(npc_id)
-    if not p.exists():
-        return {"npc_id": npc_id, "facts": [], "dialog": []}
-    return json.loads(p.read_text())
-
-
-@app.function(image=image, volumes={"/mem": vol}, timeout=60)
-def memory_append(npc_id: str, fact: dict[str, Any] | None = None, turn: dict | None = None) -> dict:
-    data = memory_get.local(npc_id)
-    if fact:
-        data.setdefault("facts", []).append(fact)
-    if turn:
-        data.setdefault("dialog", []).append(turn)
-        data["dialog"] = data["dialog"][-50:]
+@app.function(image=image, volumes={"/mem": vol}, timeout=120)
+def remember(npc_id: str, text: str, kind: str = "observation", meta: dict | None = None) -> dict:
     p = _npc_path(npc_id)
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(data, ensure_ascii=False, indent=2))
+    entry = {
+        "id": uuid.uuid4().hex[:10],
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "kind": kind,
+        "text": text,
+        "meta": meta or {},
+    }
+    with p.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
     vol.commit()
-    return data
+    return {"ok": True, "npc_id": npc_id, "entry": entry}
 
 
-@app.function(image=image, volumes={"/mem": vol}, timeout=60)
-def world_get(world_id: str = "default") -> dict:
-    p = _world_path(world_id)
+@app.function(image=image, volumes={"/mem": vol}, timeout=120)
+def recall(npc_id: str, limit: int = 20) -> dict:
+    p = _npc_path(npc_id)
     if not p.exists():
-        return {"world_id": world_id, "flags": {}, "quests": {}}
-    return json.loads(p.read_text())
-
-
-@app.function(image=image, volumes={"/mem": vol}, timeout=60)
-def world_patch(world_id: str, flags: dict | None = None, quests: dict | None = None) -> dict:
-    data = world_get.local(world_id)
-    if flags:
-        data.setdefault("flags", {}).update(flags)
-    if quests:
-        data.setdefault("quests", {}).update(quests)
-    p = _world_path(world_id)
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(data, ensure_ascii=False, indent=2))
-    vol.commit()
-    return data
-
-
-@app.function(image=image, volumes={"/mem": vol}, timeout=60)
-@modal.asgi_app()
-def api():
-    from fastapi import FastAPI
-    from pydantic import BaseModel
-    from typing import Any
-
-    web = FastAPI(title="gf-04-02-memory")
-
-    class MemIn(BaseModel):
-        npc_id: str
-        fact: dict[str, Any] | None = None
-        turn: dict[str, Any] | None = None
-
-    class WorldIn(BaseModel):
-        world_id: str = "default"
-        flags: dict[str, Any] | None = None
-        quests: dict[str, Any] | None = None
-
-    @web.get("/npc/{npc_id}")
-    def get_npc(npc_id: str):
-        return memory_get.local(npc_id)
-
-    @web.post("/npc")
-    def post_npc(body: MemIn):
-        return memory_append.local(body.npc_id, body.fact, body.turn)
-
-    @web.get("/world/{world_id}")
-    def get_world(world_id: str):
-        return world_get.local(world_id)
-
-    @web.post("/world")
-    def post_world(body: WorldIn):
-        return world_patch.local(body.world_id, body.flags, body.quests)
-
-    return web
+        return {"ok": True, "npc_id": npc_id, "memories": []}
+    lines = p.read_text(encoding="utf-8").strip().splitlines()
+    items = [json.loads(x) for x in lines[-limit:]]
+    return {"ok": True, "npc_id": npc_id, "memories": items, "count": len(items)}
 
 
 @app.local_entrypoint()
-def main():
-    print(memory_append.remote("guard_01", fact={"met_player": True}))
-    print(world_patch.remote("default", flags={"gate_open": False}))
+def main(npc_id: str = "guard_01", text: str = "玩家询问了北塔方向"):
+    w = remember.remote(npc_id=npc_id, text=text)
+    r = recall.remote(npc_id=npc_id, limit=5)
+    print(json.dumps({"write": w, "recall": r}, ensure_ascii=False, indent=2))

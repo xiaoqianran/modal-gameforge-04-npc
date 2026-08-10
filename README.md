@@ -1,17 +1,19 @@
 # modal-gameforge-04-npc
 
-智能 NPC：**结构化动作脑 → 记忆/世界状态 → 任务叙事**
+智能 NPC —— **one-shot `modal run` only**（无 asgi / 无 deploy 常驻）。
 
-## 仓内编号
+```bash
+modal run apps/01-brain/app.py --text "前面那座塔是什么地方？"
+modal run apps/02-memory/app.py --npc-id guard_01 --text "玩家问了北塔"
+modal run apps/03-quest/app.py --seed "清剿东边狼群"
+```
 
-| 序号 | 模块 | 默认模型 |
-|------|------|----------|
-| 01 | Brain | **Qwen2.5-14B-Instruct**（GPU）/ 规则 fallback |
-| 02 | Memory | Volume + JSON/SQLite 记忆库 |
-| 03 | Quest | 约束式任务图生成 |
+| 序号 | 模块 | 说明 |
+|------|------|------|
+| 01 | brain | 结构化 NPC actions JSON |
+| 02 | memory | Volume 记忆 |
+| 03 | quest | 任务图 |
 
-输出严格符合 `00-hub` contracts 中的 `NpcTurn` JSON，供 Godot 解释执行。
+## Docs
 
-## Docs site
-
-GitHub Pages（Actions 部署）: https://xiaoqianran.github.io/modal-gameforge-04-npc/
+https://xiaoqianran.github.io/modal-gameforge-04-npc/

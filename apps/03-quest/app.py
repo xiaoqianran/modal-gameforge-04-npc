@@ -1,81 +1,42 @@
-"""03-quest — Constrained quest / narrative generation.
+"""03-quest — constrained quest graph generator (one-shot).
 
-Modal App: gf-04-03-quest
+  modal run apps/03-quest/app.py --seed "清剿东边狼群"
 """
 from __future__ import annotations
 
 import json
-from typing import Any
+import uuid
+from datetime import datetime, timezone
 
 import modal
 
-APP_NAME = "gf-04-03-quest"
+APP_NAME = "gf-04-03-quest-run"
 app = modal.App(APP_NAME)
-image = modal.Image.debian_slim(python_version="3.11").pip_install("pydantic>=2", "fastapi[standard]")
+image = modal.Image.debian_slim(python_version="3.11")
 
 
 @app.function(image=image, timeout=120)
-def generate_quest(
-    seed_hook: str,
-    level: int = 1,
-    world_flags: dict[str, Any] | None = None,
-) -> dict:
-    """Rule-templated quest graph (LLM can replace later via 01-brain)."""
-    world_flags = world_flags or {}
-    qid = f"q_{abs(hash(seed_hook)) % 10_000:04d}"
+def generate_quest(seed: str = "清剿东边狼群", giver: str = "村庄守卫") -> dict:
+    qid = "q_" + uuid.uuid4().hex[:8]
     quest = {
-        "quest_id": qid,
-        "title": f"关于「{seed_hook[:12]}」的委托",
-        "level": level,
-        "stages": [
-            {
-                "id": "talk_npc",
-                "type": "talk",
-                "target": "quest_giver",
-                "desc": f"与委托人交谈，了解{seed_hook}",
-            },
-            {
-                "id": "collect_or_goto",
-                "type": "goto",
-                "target": "marker_01",
-                "desc": "前往目标地点调查",
-            },
-            {
-                "id": "report",
-                "type": "talk",
-                "target": "quest_giver",
-                "desc": "回报调查结果",
-                "rewards": {"xp": 50 * level, "gold": 20 * level},
-            },
+        "schema": "gameforge.quest.v1",
+        "id": qid,
+        "title": seed[:40] or "无名委托",
+        "giver": giver,
+        "objectives": [
+            {"id": "obj1", "type": "goto", "target": "east_fields", "desc": "前往东边田埂"},
+            {"id": "obj2", "type": "defeat", "target": "wolf", "count": 3, "desc": "击败 3 只狼"},
+            {"id": "obj3", "type": "return", "target": giver, "desc": f"回报{giver}"},
         ],
-        "requires_flags": world_flags,
-        "status": "available",
-        "godot_hint": "Drive with QuestMachine; stages are linear v0",
+        "rewards": {"gold": 20, "item": "village_token"},
+        "flags": {"repeatable": False, "level_min": 1},
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "engine": "quest_rule_v1",
     }
     return quest
 
 
-@app.function(image=image, timeout=60)
-@modal.asgi_app()
-def api():
-    from fastapi import FastAPI
-    from pydantic import BaseModel
-    from typing import Any
-
-    web = FastAPI(title="gf-04-03-quest")
-
-    class Req(BaseModel):
-        seed_hook: str
-        level: int = 1
-        world_flags: dict[str, Any] | None = None
-
-    @web.post("/generate")
-    def gen(req: Req):
-        return generate_quest.remote(req.seed_hook, req.level, req.world_flags)
-
-    return web
-
-
 @app.local_entrypoint()
-def main(hook: str = "丢失的护身符"):
-    print(json.dumps(generate_quest.remote(hook), ensure_ascii=False, indent=2))
+def main(seed: str = "清剿东边狼群", giver: str = "村庄守卫"):
+    q = generate_quest.remote(seed=seed, giver=giver)
+    print(json.dumps(q, ensure_ascii=False, indent=2))

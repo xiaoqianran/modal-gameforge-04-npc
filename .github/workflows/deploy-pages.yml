@@ -37,7 +37,6 @@ jobs:
           if [ -f README.md ]; then
             cp README.md _site/README.md
           fi
-          # health file for probes
           date -u +"%Y-%m-%dT%H:%M:%SZ" > _site/build.txt
           ls -la _site
 
