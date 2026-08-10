@@ -38,6 +38,7 @@ jobs:
             cp README.md _site/README.md
           fi
           date -u +"%Y-%m-%dT%H:%M:%SZ" > _site/build.txt
+          printf '%s\n' 'pages_source=github_actions' > _site/pages_source.txt
           ls -la _site
 
       - name: Upload Pages artifact
