@@ -11,3 +11,7 @@
 | 03 | Quest | 约束式任务图生成 |
 
 输出严格符合 `00-hub` contracts 中的 `NpcTurn` JSON，供 Godot 解释执行。
+
+## Docs site
+
+GitHub Pages（Actions 部署）: https://xiaoqianran.github.io/modal-gameforge-04-npc/
