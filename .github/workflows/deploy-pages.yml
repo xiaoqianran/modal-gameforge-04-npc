@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
@@ -21,27 +21,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Pages
+      - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Assemble site
+      - name: Assemble static site
         run: |
           set -euo pipefail
           mkdir -p _site
           if [ -d site ]; then
             cp -a site/. _site/
           fi
-          # ensure index
           if [ ! -f _site/index.html ]; then
-            echo "<!doctype html><title>GameForge</title><p>missing site</p>" > _site/index.html
+            printf '%s\n' '<!doctype html><meta charset=utf-8><title>GameForge</title><p>site missing</p>' > _site/index.html
           fi
-          # optional: expose README as text
           if [ -f README.md ]; then
             cp README.md _site/README.md
           fi
+          # health file for probes
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > _site/build.txt
           ls -la _site
 
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site

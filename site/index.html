@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>04 · NPC 智能 · GameForge</title>
-  <meta name="description" content="结构化动作脑 → 记忆/世界 → 任务图" />
+  <meta name="description" content="结构化动作脑 → 记忆/世界 → 任务图 — modal run（one-shot）" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -67,6 +67,7 @@
     td.num { color: var(--accent); font-family: "IBM Plex Mono", monospace; width: 3rem; }
     ul.warn { margin: 0; padding-left: 1.1rem; color: var(--muted); font-size: 14px; }
     footer { max-width: 960px; margin: 0 auto; padding: 8px 20px 40px; color: var(--muted); font-size: 13px; }
+    .ok { color: #4ade80; font-family: "IBM Plex Mono", monospace; font-size: 12px; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -78,8 +79,9 @@
     <section class="hero">
       <div class="badge">one-shot · modal run · no deploy</div>
       <h1>04 · NPC 智能</h1>
-      <p class="lead">结构化动作脑 → 记忆/世界 → 任务图</p>
+      <p class="lead">结构化动作脑 → 记忆/世界 → 任务图 — modal run（one-shot）</p>
       <pre><code>modal run apps/01-brain/app.py --text "前面那座塔是什么地方？"</code></pre>
+      <p class="ok">✓ per-module modal run · Pages ← GitHub Actions</p>
     </section>
     <div class="grid">
       <section class="card">
@@ -96,6 +98,7 @@
           <li>❌ 不要 <code>keep_warm</code> / 常驻 GPU</li>
           <li>✅ 只用 <code>modal run</code>，跑完容器销毁</li>
           <li>✅ 产物走 Volume <code>gameforge-assets</code></li>
+          <li>✅ Pages 源 = <strong>GitHub Actions</strong></li>
           <li>源码：<a href="https://github.com/xiaoqianran/modal-gameforge-04-npc">modal-gameforge-04-npc</a></li>
         </ul>
       </section>
