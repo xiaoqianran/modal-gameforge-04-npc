@@ -1,0 +1,5 @@
+modal>=1.0
+pydantic>=2.0
+fastapi[standard]>=0.115
+httpx
+Pillow
