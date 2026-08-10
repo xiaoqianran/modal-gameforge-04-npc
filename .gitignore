@@ -11,3 +11,5 @@ venv/
 .DS_Store
 .ruff_cache/
 .mypy_cache/
+out/
+__pycache__/

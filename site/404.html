@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>04 · NPC 智能 · GameForge</title>
-  <meta name="description" content="结构化动作脑 → 记忆 → 任务图（one-shot，无 asgi 常驻）" />
+  <meta name="description" content="Brain → Memory → Quest → Godot tick（已验证双回合 + 记忆持久化）" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -77,9 +77,9 @@
     <section class="hero">
       <div class="badge">one-shot · modal run · no deploy</div>
       <h1>04 · NPC 智能</h1><p style="color:var(--muted)">页面不存在</p>
-      <p class="lead">结构化动作脑 → 记忆 → 任务图（one-shot，无 asgi 常驻）</p>
-      <pre><code>modal run apps/01-brain/app.py --text "前面那座塔是什么地方？"</code></pre>
-      <p class="ok">✓ npc · no asgi · Pages ← Actions</p>
+      <p class="lead">Brain → Memory → Quest → Godot tick（已验证双回合 + 记忆持久化）</p>
+      <pre><code>modal run apps/pipeline/app.py --text "前面那座塔是什么地方？"</code></pre>
+      <p class="ok">✓ npc done · 2 turns · memory persist · Pages ← Actions</p>
     </section>
     <div class="grid">
       <section class="card">
